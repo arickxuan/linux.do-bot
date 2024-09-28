@@ -1,4 +1,4 @@
-name: Run Linux.do Script
+name: Run gv
 
 on:
   push:
