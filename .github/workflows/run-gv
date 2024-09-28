@@ -1,0 +1,35 @@
+name: Run Linux.do Script
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '9 0 1,15 * *'  # 每隔6个小时触发一次
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  run-:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+
+
+    - name: Run script
+      env:
+        TZ: Asia/Shanghai  # 设置时区为中国时区
+        LINUXDO_USERNAME: ${{ secrets.LINUXDO_USERNAME }}
+        LINUXDO_PASSWORD: ${{ secrets.LINUXDO_PASSWORD }}
+        LIKE_PROBABILITY: ${{ secrets.LIKE_PROBABILITY }}
+        REPLY_PROBABILITY: ${{ secrets.REPLY_PROBABILITY }}
+        COLLECT_PROBABILITY: ${{ secrets.COLLECT_PROBABILITY }}
+        MAX_TOPICS: ${{ secrets.MAX_TOPICS }}
+        USE_WXPUSHER: ${{ secrets.USE_WXPUSHER }}
+        APP_TOKEN: ${{ secrets.APP_TOKEN }}
+        TOPIC_ID: ${{ secrets.TOPIC_ID }}
+      run: |
+        chmod +x gv
+        ./gv
