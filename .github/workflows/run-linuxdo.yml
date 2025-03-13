@@ -1,5 +1,4 @@
 name: Run Linux.do Script
-
 on:
   push:
     branches:
