@@ -18,15 +18,38 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
 
+    # Step 1: 更新 APT 缓存并安装必要工具
+    - name: Update APT and install prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg
+
+    # Step 2: 添加 Google Chrome 的官方 PPA
+    - name: Add Google Chrome repository
+      run: |
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+
+    # Step 3: 安装 Google Chrome Stable 版本
+    - name: Install Google Chrome
+      run: |
+        sudo apt-get install -y google-chrome-stable
+
+    # Step 4: 检查 Chrome 版本是否成功安装
+    - name: Verify Chrome Installation
+      run: |
+        google-chrome --version
+
 
     - name: Install dependencies
       run: |
         pip install --user playwright requests tabulate configparser pydoll-python
         playwright install
-        sudo apt install -y gnupg wget iproute2 wkhtmltopdf libx11-xcb1 libdbus-glib-1-2 git tini
-        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-        wget -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-        sudo apt install -y /tmp/chrome.deb
+#        sudo apt install -y wget iproute2 wkhtmltopdf libx11-xcb1 libdbus-glib-1-2 git tini
+#        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+#        wget -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+#        sudo apt install -y /tmp/chrome.deb
 
     - name: Run script
       env:
