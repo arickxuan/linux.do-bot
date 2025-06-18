@@ -47,7 +47,7 @@ jobs:
       run: |
         pip install --user playwright requests tabulate configparser pydoll-python
         playwright install
-#        sudo apt install -y wget iproute2 wkhtmltopdf libx11-xcb1 libdbus-glib-1-2 git tini
+        sudo apt install -y wkhtmltopdf libx11-xcb1 libdbus-glib-1-2 tini
 #        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 #        wget -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 #        sudo apt install -y /tmp/chrome.deb
