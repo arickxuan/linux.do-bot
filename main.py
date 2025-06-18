@@ -322,12 +322,19 @@ async def main():
     async with Chrome(options=options) as browser:
         tab = await browser.start()
 
+        # async with tab.expect_and_bypass_cloudflare_captcha():
+        #     await tab.go_to('https://site-with-cloudflare.com')
+        #     print("Waiting for captcha to be handled...")
+
         # await tab.go_to(HOME_URL)
 
-        # await asyncio.sleep(3)
+        await tab.enable_auto_solve_cloudflare_captcha()
+        await tab.go_to('https://linux.do')
 
-        re = login(tab, USERNAME, PASSWORD)
-        await re
+        await asyncio.sleep(3)
+
+        re = await login(tab, USERNAME, PASSWORD)
+        logging.info(re)
 
         await tab.go_to("https://linux.do/unseen?ascending=false&order=posts")
 
