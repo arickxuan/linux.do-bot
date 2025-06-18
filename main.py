@@ -306,13 +306,18 @@ async def main():
         logging.error(f"缺少必要配置: {', '.join(missing_configs)}，请在环境变量或配置文件中设置。")
         exit(1)
 
+    system_name = platform.system()
     options = ChromiumOptions()
-    # options.binary_location = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+    #
     options.add_argument('--headless=new')
     options.add_argument('--start-maximized')
     options.add_argument("--no-sandbox")
     options.add_argument('--disable-notifications')
     options.add_argument('--remote-debugging-port=9123')
+    if system_name == "Linux":
+        options.binary_location = '/usr/bin/google-chrome'
+    elif system_name == "Darwin":
+        options.binary_location = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 
     async with Chrome(options=options) as browser:
         tab = await browser.start()
