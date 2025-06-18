@@ -21,7 +21,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install playwright requests tabulate configparser
+        pip install --user playwright requests tabulate configparser pydoll-python
         playwright install
         apt install -y gnupg wget iproute2 wkhtmltopdf libx11-xcb1 libdbus-glib-1-2 git tini
         wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
