@@ -112,7 +112,7 @@ async def visit_article_and_scroll(tab,goDone):
         scroll_end_time = time.time() + scroll_duration
 
         # 创建连接处理器
-        # connection = ConnectionHandler()
+        connection = ConnectionHandler(9123)
 
         while time.time() < scroll_end_time:
             scroll_distance = random.randint(300, 600)  # 每次滚动的距离，随机选择
