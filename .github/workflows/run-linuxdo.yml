@@ -24,6 +24,11 @@ jobs:
       run: |
         pip install playwright requests tabulate configparser
         playwright install
+        apt install -y gnupg wget iproute2 wkhtmltopdf libx11-xcb1 libdbus-glib-1-2 git tini
+        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+#        wget -O /tmp/chrome.deb https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_$CHROMEDRIVER_VERSION-1_amd64.deb
+        wget -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        apt install -y /tmp/chrome.deb
 
     - name: Run script
       env:
