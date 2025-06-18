@@ -311,7 +311,7 @@ async def main():
     #
     options.add_argument('--headless=new')
     options.add_argument('--start-maximized')
-    # options.add_argument("--no-sandbox")
+    options.add_argument("--no-sandbox")
     options.add_argument('--disable-notifications')
     # options.add_argument('--remote-debugging-port=9123')
     if system_name == "Linux":
