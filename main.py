@@ -309,9 +309,9 @@ async def main():
     system_name = platform.system()
     options = ChromiumOptions()
     #
-    options.add_argument('--headless=new')
+    # options.add_argument('--headless=new')
     options.add_argument('--start-maximized')
-    options.add_argument("--no-sandbox")
+    # options.add_argument("--no-sandbox")
     options.add_argument('--disable-notifications')
     # options.add_argument('--remote-debugging-port=9123')
     if system_name == "Linux":
@@ -328,10 +328,10 @@ async def main():
 
         # await tab.go_to(HOME_URL)
 
-        await tab.enable_auto_solve_cloudflare_captcha()
-        await tab.go_to('https://linux.do')
-
-        await asyncio.sleep(3)
+        # await tab.enable_auto_solve_cloudflare_captcha()
+        # await tab.go_to('https://linux.do')
+        #
+        # await asyncio.sleep(3)
 
         re = await login(tab, USERNAME, PASSWORD)
         logging.info(re)
