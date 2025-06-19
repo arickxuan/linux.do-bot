@@ -18,7 +18,7 @@ from pydoll.commands import InputCommands
 from pydoll.connection.connection_handler import ConnectionHandler
 
 
-from pydoll.constants import MouseEventType, MouseButton
+from pydoll.constants import MouseEventType, MouseButton, By
 
 # 自动判断运行环境
 IS_GITHUB_ACTIONS = 'GITHUB_ACTIONS' in os.environ
@@ -78,36 +78,43 @@ async def login(tab, USERNAME, PASSWORD) -> bool:
     # )
     # star_button.click()
     # await asyncio.sleep(3)
+    try:
 
-    await tab.go_to("https://linux.do/login")
-    await asyncio.sleep(3)
-    name_input = await tab.find(
-        id="login-account-name",
-    )
-    await name_input.type_text(USERNAME, interval=0.15)
-    await asyncio.sleep(3)
-    pwd_input = await tab.find(
-        id="login-account-password",
-    )
-    await pwd_input.click()
-    await pwd_input.type_text(PASSWORD, interval=0.15)
-    await asyncio.sleep(3)
-    login_btn = await tab.find(id="login-button")
-    await login_btn.click()
-    await asyncio.sleep(10)  # 等待页面加载完成
-    user_ele = await tab.find(id="current-user")
-    if not user_ele:
-        logging.error("登录失败，请检查账号密码及是否关闭二次认证")
-        return False
-    else:
-        logging.info("登录成功")
-        return True
+        await tab.go_to("https://linux.do/login")
+        await asyncio.sleep(3)
+        # name_input = await tab.find(id="login-account-name",)
+        name_input = await tab.find_or_wait_element(By.ID,value="login-account-name",timeout=30)
+        await name_input.type_text(USERNAME, interval=0.15)
+        await asyncio.sleep(3)
+        pwd_input = await tab.find(
+            id="login-account-password",
+        )
+        await pwd_input.click()
+        await pwd_input.type_text(PASSWORD, interval=0.15)
+        await asyncio.sleep(3)
+        login_btn = await tab.find(id="login-button")
+        await login_btn.click()
+        await asyncio.sleep(10)  # 等待页面加载完成
+        user_ele = await tab.find(id="current-user")
+        if not user_ele:
+            logging.error("登录失败，请检查账号密码及是否关闭二次认证")
+            return False
+        else:
+            logging.info("登录成功")
+            return True
+    except Exception as e:
+        logging.error(f"登录页面时出错: {e}")
+        screenshot_path = os.path.join(os.getcwd(), 'login.png')
+        await tab.take_screenshot(path=screenshot_path)
+        logging.info(f"Screenshot saved to: {screenshot_path}")
 
 
-async def visit_article_and_scroll(tab,goDone):
+async def visit_article_and_scroll(tab, go_done):
     try:
         # 随机滚动页面5到10秒
         scroll_duration = random.randint(5, 10)
+        if go_done:
+            scroll_duration = random.randint(25, 40)
         logging.info(f"随机滚动页面 {scroll_duration} 秒...")
         scroll_end_time = time.time() + scroll_duration
 
@@ -117,8 +124,8 @@ async def visit_article_and_scroll(tab,goDone):
         while time.time() < scroll_end_time:
             scroll_distance = random.randint(300, 600)  # 每次滚动的距离，随机选择
             # page.mouse.wheel(0, scroll_distance)
-            scroll_command = InputCommands.dispatch_mouse_event(MouseEventType.MOUSE_WHEEL ,200, 200,delta_y=-scroll_distance,button=MouseButton.MIDDLE)
-            # await connection.execute_command(scroll_command)
+            scroll_command = InputCommands.dispatch_mouse_event(MouseEventType.MOUSE_WHEEL ,200, 200,delta_y=-scroll_distance)
+            await connection.execute_command(scroll_command)
             js = """window.scrollBy({
               top: 800,   // 垂直滚动距离（向下滚动为正值）
               left: 0,    // 水平滚动距离（为0表示水平不滚动）
@@ -126,7 +133,7 @@ async def visit_article_and_scroll(tab,goDone):
             });"""
                   # .format(scroll_distance))
             js_done = """function scrollToBottomSmooth() {
-              const scrollStep = 50; // 每次滚动的距离
+              const scrollStep = 25; // 每次滚动的距离
               const scrollTop = window.scrollY; // 当前滚动位置
               const windowHeight = window.innerHeight; // 当前窗口高度
               const scrollHeight = document.documentElement.scrollHeight; // 页面整体高度
@@ -141,11 +148,10 @@ async def visit_article_and_scroll(tab,goDone):
             
             // 调用函数
             scrollToBottomSmooth();"""
-            if goDone:
+            if go_done:
                 await tab.execute_script(js_done)
             else:
                 await tab.execute_script(js)
-            # await tab.execute_command(scroll_command)
             await asyncio.sleep(random.uniform(0.5, 1.5))  # 随机等待0.5到1.5秒再滚动
 
         logging.info("页面滚动完成")
@@ -175,15 +181,21 @@ async def click_topic(browser,tab,HOME_URL,MAX_TOPICS,LIKE_PROBABILITY):
         await visit_article_and_scroll(tab,False)
         logging.info(await browser.get_version())
         # 加载主题
-        topics = await tab.query("//*[@id=\"list-area\"]//table[@class='topic-list']//tr/td//a[@title and not(ancestor::span[contains(@class, 'topic-statuses')]/a[contains(@class, 'pinned')])]", find_all=True)
+        topics = await tab.query("//*[@id=\"list-area\"]//table[@class='topic-list']//tr/td//a[@title]", find_all=True)
         logging.info(topics)
-        total_topics = len(topics)
-        logging.info(f"共找到 {total_topics} 个主题。")
+        topics2 = []
+        for idx, topic in enumerate(topics):
+            article_url = HOME_URL + topic.get_attribute("href")
+
+            if article_url.find("/t/topic/") != -1:
+                topics2.append(topic)
+        total_topics = len(topics2)
+        logging.info(f"共找到 {topics2} 个主题。")
 
         # 限制处理的最大主题数
         if total_topics > MAX_TOPICS:
             logging.info(f"处理主题数超过最大限制 {MAX_TOPICS}，仅处理前 {MAX_TOPICS} 个主题。")
-            topics = topics[:MAX_TOPICS]
+            topics = topics[2:MAX_TOPICS+2]
 
         skip_articles = []
         skip_count = 0
@@ -196,13 +208,16 @@ async def click_topic(browser,tab,HOME_URL,MAX_TOPICS,LIKE_PROBABILITY):
         collected_articles = []
         collect_count = 0
 
-        for idx, topic in enumerate(topics):
+        for idx, topic in enumerate(topics2):
 
             article_title = await topic.text
 
             article_url = HOME_URL + topic.get_attribute("href")
 
-            logging.info(f"打开第 {idx + 1}/{len(topics)} 个主题 ：{article_title.strip()} ... ")
+            # if article_url.find("/t/topic/") == -1:
+            #     continue
+
+            logging.info(f"打开第 {idx + 1}/{len(topics)} 个主题 ：{article_url.strip()} ... ")
 
             # 访问文章页面
             article_tab = await browser.new_tab(article_url)
@@ -288,7 +303,7 @@ async def main():
     USE_WXPUSHER = os.getenv("USE_WXPUSHER", config.get('wxpusher', 'use_wxpusher', fallback='false')).lower() == 'true'
     APP_TOKEN = os.getenv("APP_TOKEN", config.get('wxpusher', 'app_token', fallback=None))
     TOPIC_ID = os.getenv("TOPIC_ID", config.get('wxpusher', 'topic_id', fallback=None))
-    MAX_TOPICS = int(os.getenv("MAX_TOPICS", config.get('settings', 'max_topics', fallback='50')))
+    MAX_TOPICS = int(os.getenv("MAX_TOPICS", config.get('settings', 'max_topics', fallback='80')))
 
     # 检查必要配置
     missing_configs = []
@@ -313,13 +328,16 @@ async def main():
     options.add_argument('--start-maximized')
     # options.add_argument("--no-sandbox")
     options.add_argument('--disable-notifications')
+    # options.add_argument('--user-data-dir=Default')
+    options.add_argument(f'--profile-directory=Default')
+
     # options.add_argument('--remote-debugging-port=9123')
     if system_name == "Linux":
         options.binary_location = '/usr/bin/google-chrome'
     elif system_name == "Darwin":
         options.binary_location = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 
-    async with Chrome(options=options) as browser:
+    async with Chrome(options=options,connection_port=9123) as browser:
         tab = await browser.start()
 
         # async with tab.expect_and_bypass_cloudflare_captcha():
@@ -328,10 +346,13 @@ async def main():
 
         # await tab.go_to(HOME_URL)
 
-        # await tab.enable_auto_solve_cloudflare_captcha()
-        # await tab.go_to('https://linux.do')
+        await tab.enable_auto_solve_cloudflare_captcha()
+        await tab.go_to('https://linux.do')
         #
-        # await asyncio.sleep(3)
+        await asyncio.sleep(10)
+        screenshot_path = os.path.join(os.getcwd(), 'cap.png')
+        await tab.take_screenshot(path=screenshot_path)
+        logging.info(f"cap saved to: {screenshot_path}")
 
         re = await login(tab, USERNAME, PASSWORD)
         logging.info(re)
