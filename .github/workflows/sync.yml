@@ -1,6 +1,6 @@
 name: Sync Upstream
 
-permissions: write-all              # 授予写权限
+permissions: write-all              # 授予写权限 ？
 
 on: 
   schedule:
