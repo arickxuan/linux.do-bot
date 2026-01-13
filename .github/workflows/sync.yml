@@ -1,35 +1,35 @@
-name: Sync Upstream
+# name: Sync Upstream
 
-permissions: write-all              # 授予写权限 ？
+# permissions: write-all              # 授予写权限 ？
 
-on: 
-  schedule:
-    - cron: '0 */13 * * *'             # 每隔12个小时触发一次
-  workflow_dispatch:                # 允许手动触发工作流
+# on: 
+#   schedule:
+#     - cron: '0 */13 * * *'             # 每隔12个小时触发一次
+#   workflow_dispatch:                # 允许手动触发工作流
 
-jobs:
-  sync-upstream:
-    runs-on: ubuntu-latest
-    steps: 
-      - name: Checkout
-        uses: actions/checkout@v3
+# jobs:
+#   sync-upstream:
+#     runs-on: ubuntu-latest
+#     steps: 
+#       - name: Checkout
+#         uses: actions/checkout@v3
 
-      - name: Sync upstream changes
-        id: sync
-        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
-        with:
-            target_repo_token: ${{ secrets.GITHUB_TOKEN }}
-            target_sync_branch: main
-            upstream_sync_branch: main
-            upstream_sync_repo: LeeYouRan/linux.do-bot
+#       - name: Sync upstream changes
+#         id: sync
+#         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+#         with:
+#             target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+#             target_sync_branch: main
+#             upstream_sync_branch: main
+#             upstream_sync_repo: LeeYouRan/linux.do-bot
 
-            # 在手动调度期间将 test_mode 设置为 true 来运行测试而不是 true 操作！！
-            test_mode: false
+#             # 在手动调度期间将 test_mode 设置为 true 来运行测试而不是 true 操作！！
+#             test_mode: false
 
-      - name: Sync check
-        if: failure()
-        env:
-          TZ: Asia/Shanghai  # 设置时区为中国时区
-        run: |
-          echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次。"
-          exit 1
+#       - name: Sync check
+#         if: failure()
+#         env:
+#           TZ: Asia/Shanghai  # 设置时区为中国时区
+#         run: |
+#           echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次。"
+#           exit 1
