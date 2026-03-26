@@ -1,4 +1,4 @@
-name: Run gv
+name: Run gv ok
 
 on:
   push:
