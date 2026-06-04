@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '9 0 1,15 * *'  # 每隔6个小时触发一次
+    - cron: '9 0 1,15 * *'  # 每隔6个小时触发一次 。
   workflow_dispatch: # 允许手动触发
 
 jobs:
